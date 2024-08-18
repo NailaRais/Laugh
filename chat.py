@@ -1,16 +1,18 @@
+# chat.py
 import sys
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model_name = "gpt2-medium"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
-
-tokenizer.pad_token = tokenizer.eos_token
-model.config.pad_token_id = tokenizer.eos_token_id
-
 def generate_response(prompt):
+    model_name = "gpt2-medium"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+
+    tokenizer.pad_token = tokenizer.eos_token
+    model.config.pad_token_id = tokenizer.eos_token_id
+
     inputs = tokenizer(prompt, return_tensors="pt", padding=True)
+    
     with torch.no_grad():
         outputs = model.generate(
             inputs['input_ids'],
@@ -22,6 +24,7 @@ def generate_response(prompt):
             repetition_penalty=1.2,
             pad_token_id=tokenizer.pad_token_id
         )
+    
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
     return response.strip()
 
